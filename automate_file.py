@@ -230,14 +230,16 @@ def fill_page_2(row, i):
 # ---------------- MANUAL SUBMIT ----------------
 
 def wait_for_manual_submit():
-    print("🖐 Waiting for manual submit...")
+    input("👉 Press ENTER after clicking Submit...")
 
     wait.until(EC.presence_of_element_located((
-        By.XPATH, "//div[contains(text(),'Your response has been recorded')]"
+        By.XPATH, "//*[contains(text(),'response has been recorded')]"
     )))
 
-    print("✅ Submitted. Moving next...")
+    print("✅ Submission confirmed!")
     time.sleep(2)
+
+s
 
 
 # ---------------- MAIN LOOP ----------------
