@@ -17,7 +17,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ---------------- CONFIG ----------------
 
 sheet_url = "https://docs.google.com/spreadsheets/d/1WRJF00nDqDroXi70T4PO4qqipuancUvKO2zyoVdPyhQ/export?format=csv"
-form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfX5zOmuBRtYlZM_FSVH2-vrTJjShX8XOIWt-cN81-P5sWDsA/viewform"
+form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfX5zOmuBRtYlZM_FSVH2-vrTJjShX8XOIWt-cN81-P5sWDsA/viewform?usp=dialog"
 
 PROFILE_PATH = "/home/amartya-mandal/selenium-profile"
 IMAGE_DIR = "./images"
@@ -25,10 +25,25 @@ IMAGE_DIR = "./images"
 
 # ---------------- LOAD DATA ----------------
 
-print("Loading sheet...")
-df = pd.read_csv(sheet_url, engine="python")
+# print("Loading sheet...")
+# df = pd.read_csv(sheet_url, engine="python")
+
+# df = df.fillna("").astype(str)
+# for col in df.columns:
+#     df[col] = df[col].str.strip()
+
+df = pd.read_csv(
+    sheet_url,
+    dtype={
+        "Phone Number": str,
+        "Consumer Mobile Number": str,
+        "Mobile Number of Any One Consumer": str
+    },
+    engine="python"
+)
 
 df = df.fillna("").astype(str)
+
 for col in df.columns:
     df[col] = df[col].str.strip()
 
@@ -239,7 +254,6 @@ def wait_for_manual_submit():
     print("✅ Submission confirmed!")
     time.sleep(2)
 
-s
 
 
 # ---------------- MAIN LOOP ----------------
