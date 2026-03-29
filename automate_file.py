@@ -32,6 +32,8 @@ IMAGE_DIR = "./images"
 # for col in df.columns:
 #     df[col] = df[col].str.strip()
 
+
+#New Number format updated
 df = pd.read_csv(
     sheet_url,
     dtype={
