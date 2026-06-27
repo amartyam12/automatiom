@@ -19,7 +19,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 '''sheet_url = "https://docs.google.com/spreadsheets/d/1WRJF00nDqDroXi70T4PO4qqipuancUvKO2zyoVdPyhQ/export?format=csv"
 form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfX5zOmuBRtYlZM_FSVH2-vrTJjShX8XOIWt-cN81-P5sWDsA/viewform?usp=dialog"
 '''
-
 sheet_url = "https://docs.google.com/spreadsheets/d/1WRJF00nDqDroXi70T4PO4qqipuancUvKO2zyoVdPyhQ/export?format=csv"
 form_url = "https://docs.google.com/forms/d/e/1FAIpQLScVXm9lrcK2JI3z24EjuYJPwrF84P5ApFeHnyqo-leGNihKTg/viewform"
 
@@ -58,7 +57,6 @@ df["Date of Activity"] = pd.to_datetime(
 ).dt.strftime("%m/%d/%Y")
 
 print(df.head())
-
 
 # ---------------- LOAD IMAGES ----------------
 
@@ -115,6 +113,53 @@ def fill_text(label, value):
 
 # ---------------- DROPDOWN (FINAL FIX) ----------------
 
+def select_dropdown(label, value):
+    print(f"Selecting {label}: {value}")
+
+    actions = ActionChains(driver)
+
+    # 1️⃣ Find the correct question block
+    question = wait.until(EC.presence_of_element_located((
+        By.XPATH,
+        f"//div[@role='listitem'][.//text()[contains(.,'{label}')]]"
+    )))
+
+    # 2️⃣ Find dropdown INSIDE that question (🔥 FIX)
+    dropdown = question.find_element(By.XPATH, ".//div[@role='listbox']")
+
+    # 3️⃣ Click dropdown
+    actions.move_to_element(dropdown).click().perform()
+    time.sleep(1)
+
+    # 4️⃣ Wait for visible options
+    options = wait.until(EC.presence_of_all_elements_located((
+        By.XPATH, "//div[@role='option' and not(@aria-hidden='true')]"
+    )))
+
+    print(f"Options found: {len(options)}")
+
+    # 5️⃣ Select correct option
+    for opt in options:
+        data_val = opt.get_attribute("data-value")
+
+        print("Option:", data_val)
+
+        if data_val and data_val.strip().lower() == str(value).strip().lower():
+            actions.move_to_element(opt).click().perform()
+            print(f"✅ Selected: {data_val}")
+            time.sleep(1)
+            return
+
+    raise Exception(f"❌ Value '{value}' not found in {label}")
+
+
+from selenium.common.exceptions import NoSuchElementException
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+
+
+
 def select_radio(label, value):
     print(f"Selecting {label}: {value}")
 
@@ -164,46 +209,6 @@ def select_radio(label, value):
         time.sleep(0.5)
 
     raise Exception(f"District '{value}' not found.")
-
-def select_dropdown(label, value):
-    print(f"Selecting {label}: {value}")
-
-    actions = ActionChains(driver)
-
-    # 1️⃣ Find the correct question block
-    question = wait.until(EC.presence_of_element_located((
-        By.XPATH,
-        f"//div[@role='listitem'][.//text()[contains(.,'{label}')]]"
-    )))
-
-    # 2️⃣ Find dropdown INSIDE that question (🔥 FIX)
-    dropdown = question.find_element(By.XPATH, ".//div[@role='listbox']")
-
-    # 3️⃣ Click dropdown
-    actions.move_to_element(dropdown).click().perform()
-    time.sleep(1)
-
-    # 4️⃣ Wait for visible options
-    options = wait.until(EC.presence_of_all_elements_located((
-        By.XPATH, "//div[@role='option' and not(@aria-hidden='true')]"
-    )))
-
-    print(f"Options found: {len(options)}")
-
-    # 5️⃣ Select correct option
-    for opt in options:
-        data_val = opt.get_attribute("data-value")
-
-        print("Option:", data_val)
-
-        if data_val and data_val.strip().lower() == str(value).strip().lower():
-            actions.move_to_element(opt).click().perform()
-            print(f"✅ Selected: {data_val}")
-            time.sleep(1)
-            return
-
-    raise Exception(f"❌ Value '{value}' not found in {label}")
-
 
 # ---------------- BUTTONS ----------------
 
@@ -260,7 +265,6 @@ def fill_page_1(row):
     select_dropdown("Category", row["Category"])
     time.sleep(1)
 
-    #select_dropdown("District", row["District"])
     select_radio("District", row["District"])
 
     click_next()
@@ -269,8 +273,7 @@ def fill_page_1(row):
 def fill_page_2(row, i):
     fill_text("Date of Activity", row["Date of Activity"])
 
-    #select_dropdown("Place of Activity", row["Place of Activity"])
-    select_radio("Place of Activity", row["Place of Activity"])
+    select_dropdown("Place of Activity", row["Place of Activity"])
     time.sleep(1)
 
     fill_text("Consumer Name", row["Consumer Name"])
@@ -286,12 +289,10 @@ def fill_page_2(row, i):
     fill_text("No. of Engineers Attended", row["No. of Engineers Attended"])
     fill_text("No. of Dealers Attended", row["No. of Dealers Attended"])
 
-    #select_dropdown("Ring Test Conducted", row["Ring Test Conducted"])
-    select_radio("Ring Test Conducted", row["Ring Test Conducted"])
+    select_dropdown("Ring Test Conducted", row["Ring Test Conducted"])
     time.sleep(1)
 
-    #select_dropdown("Weighment Test Conducted", row["Weighment Test Conducted"])
-    select_radio("Weighment Test Conducted", row["Weighment Test Conducted"])
+    select_dropdown("Weighment Test Conducted", row["Weighment Test Conducted"])
 
     img1, img2 = get_images_for_row(i)
 
